@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Adham Planner | مخطط أدهم - إدارة اليوم والدراسة</title>
+  <meta name="description" content="Personal Productivity + Study Planner لطالب Computer Science - إدارة اليوم والدراسة والكلية والقرآن والصلاة">
+  
+  <!-- Google Fonts: Cairo for high-quality Arabic typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Confetti Canvas for 100% completion celebration -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <div class="app-layout">
+    <!-- SIDEBAR (Desktop / Tablet) -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="brand-logo">
+          <span class="brand-icon">⚡</span>
+          <div class="brand-text">
+            <h2>ADHAM PLANNER</h2>
+            <span class="brand-sub">مخطط أدهم</span>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-view="home">
+          <span class="nav-icon">🏠</span>
+          <span class="nav-label">الرئيسية</span>
+        </button>
+        <button class="nav-item" data-view="weekly">
+          <span class="nav-icon">📅</span>
+          <span class="nav-label">الجدول الأسبوعي</span>
+        </button>
+        <button class="nav-item" data-view="subjects">
+          <span class="nav-icon">📚</span>
+          <span class="nav-label">المواد والمؤقت</span>
+        </button>
+        <button class="nav-item" data-view="statistics">
+          <span class="nav-icon">📊</span>
+          <span class="nav-label">الإحصائيات</span>
+        </button>
+        <button class="nav-item" data-view="settings">
+          <span class="nav-icon">⚙️</span>
+          <span class="nav-label">الإعدادات</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="streak-badge" id="sidebar-streak-badge" title="سلسلة الإنجاز اليومي">
+          <span class="streak-flame">🔥</span>
+          <div class="streak-info">
+            <span class="streak-count" id="sidebar-streak-count">0 أيام</span>
+            <span class="streak-text">سلسلة الإنجاز</span>
+          </div>
+        </div>
+        <div class="motto-box">
+          <p class="motto-title">Adham Planner</p>
+          <p class="motto-quote">"Your Goals • Your Future"</p>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN WRAPPER -->
+    <div class="main-wrapper">
+      <!-- HEADER -->
+      <header class="app-header">
+        <div class="header-right">
+          <div class="header-title-box">
+            <h1 class="header-page-title" id="page-title">الرئيسية</h1>
+            <div class="date-badge" id="current-date-badge">
+              <span class="calendar-icon">📅</span>
+              <span id="current-date-text">جارٍ تحميل التاريخ...</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="header-left">
+          <!-- Quick Day Selector for Testing or Planning -->
+          <div class="day-switcher-dropdown">
+            <label for="day-select-view" class="sr-only">اختر اليوم للمعاينة:</label>
+            <select id="day-select-view" class="select-input select-sm" title="عرض أهداف يوم معين">
+              <option value="today">اليوم الحالي (تلقائي)</option>
+              <option value="5">الجمعة</option>
+              <option value="6">السبت</option>
+              <option value="0">الأحد</option>
+              <option value="1">الاثنين</option>
+              <option value="2">الثلاثاء</option>
+              <option value="3">الأربعاء</option>
+              <option value="4">الخميس</option>
+            </select>
+          </div>
+
+          <!-- Streak Pill on Header -->
+          <div class="header-streak-pill" id="header-streak-pill" title="أيام تحقيق الـ Target المتتالية">
+            <span>🔥</span>
+            <strong id="header-streak-num">0</strong>
+            <small>أيام</small>
+          </div>
+
+          <!-- Dark/Light Mode Toggle -->
+          <button class="icon-btn theme-toggle-btn" id="theme-toggle-btn" title="تبديل المظهر الداكن / الفاتح" aria-label="تبديل المظهر">
+            <span id="theme-icon">🌙</span>
+          </button>
+
+          <!-- Notifications Permission Button -->
+          <button class="icon-btn" id="notifications-btn" title="تفعيل / تعطيل الإشعارات" aria-label="الإشعارات">
+            <span id="notifications-icon">🔔</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- CONTENT BODY (Views) -->
+      <main class="app-main" id="main-content">
+
+        <!-- ============================================== -->
+        <!-- VIEW 1: HOME PAGE -->
+        <!-- ============================================== -->
+        <section class="view-section active" id="view-home">
+          <!-- Hero Banner -->
+          <div class="hero-banner card">
+            <div class="hero-content">
+              <div class="hero-greeting-line">
+                <h2 class="hero-greeting" id="hero-greeting">صباح الخير يا أدهم 👋</h2>
+                <span class="day-badge" id="hero-day-badge">اليوم</span>
+              </div>
+              <p class="hero-quote" id="hero-quote">"خطوة صغيرة كل يوم تصنع فرقًا كبيرًا."</p>
+              
+              <!-- Quick College Status Pill -->
+              <div class="college-today-status" id="college-today-status">
+                <span class="college-status-icon">🎓</span>
+                <span class="college-status-text" id="college-status-desc">جارٍ مراجعة جدول الكلية...</span>
+              </div>
+            </div>
+
+            <!-- Circular Progress Dashboard -->
+            <div class="hero-progress-box">
+              <div class="circular-progress-wrap">
+                <svg class="progress-ring" width="130" height="130">
+                  <circle class="progress-ring-circle-bg" stroke-width="10" cx="65" cy="65" r="52"></circle>
+                  <circle class="progress-ring-circle" id="home-progress-ring" stroke-width="10" cx="65" cy="65" r="52"></circle>
+                </svg>
+                <div class="circular-progress-inner">
+                  <span class="progress-percent" id="home-progress-percent">0%</span>
+                  <span class="progress-fraction" id="home-progress-fraction">0 من 0</span>
+                </div>
+              </div>
+              <div class="daily-score-badge" id="home-score-badge">غدًا أفضل</div>
+            </div>
+          </div>
+
+          <!-- Quran Routine Quick Tracker Card -->
+          <div class="quran-routine-card card">
+            <div class="quran-card-header">
+              <div class="card-title-group">
+                <span class="card-icon-tag bg-quran">📖</span>
+                <div>
+                  <h3 class="card-title">الورد القرآني اليومي</h3>
+                  <p class="card-subtitle">تثبيت الحفظ بعد الفجر • المراجعة بعد المغرب</p>
+                </div>
+              </div>
+              <span class="badge badge-quran" id="quran-status-badge">0 من 2 مكتمل</span>
+            </div>
+            <div class="quran-check-row">
+              <label class="quran-check-item" id="quran-memo-container">
+                <input type="checkbox" id="quran-memo-check" class="custom-checkbox">
+                <div class="quran-check-content">
+                  <div class="quran-check-title">
+                    <span>حفظ القرآن (بعد الفجر 6:20)</span>
+                    <span class="status-indicator" id="quran-memo-indicator">لم يتم</span>
+                  </div>
+                  <input type="text" id="quran-memo-notes" class="input-inline" placeholder="اكتب السورة / رقم الصفحات (اختياري)...">
+                </div>
+              </label>
+
+              <label class="quran-check-item" id="quran-rev-container">
+                <input type="checkbox" id="quran-rev-check" class="custom-checkbox">
+                <div class="quran-check-content">
+                  <div class="quran-check-title">
+                    <span>مراجعة القرآن (بعد المغرب 7:00)</span>
+                    <span class="status-indicator" id="quran-rev-indicator">لم يتم</span>
+                  </div>
+                  <input type="text" id="quran-rev-notes" class="input-inline" placeholder="اكتب أوجه المراجعة (اختياري)...">
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Category Targets Grid -->
+          <div class="section-title-wrap">
+            <h3 class="section-title">📊 توزيع مستهدفات اليوم (Category Targets)</h3>
+            <span class="section-meta" id="categories-completed-summary">0 من 5 فئات مكتملة</span>
+          </div>
+
+          <div class="category-cards-grid">
+            <!-- 1. الصلاة -->
+            <div class="category-card card" data-cat="prayer">
+              <div class="cat-header">
+                <span class="cat-icon bg-prayer">🕌</span>
+                <span class="cat-name">الصلاة</span>
+              </div>
+              <div class="cat-progress-wrap">
+                <div class="cat-numbers">
+                  <span class="cat-count" id="cat-prayer-count">0 من 5</span>
+                  <span class="cat-pct" id="cat-prayer-pct">0%</span>
+                </div>
+                <div class="progress-bar-bg">
+                  <div class="progress-bar-fill fill-prayer" id="cat-prayer-fill" style="width: 0%"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. الأذكار -->
+            <div class="category-card card" data-cat="adhkar">
+              <div class="cat-header">
+                <span class="cat-icon bg-adhkar">🤲</span>
+                <span class="cat-name">الأذكار</span>
+              </div>
+              <div class="cat-progress-wrap">
+                <div class="cat-numbers">
+                  <span class="cat-count" id="cat-adhkar-count">0 من 2</span>
+                  <span class="cat-pct" id="cat-adhkar-pct">0%</span>
+                </div>
+                <div class="progress-bar-bg">
+                  <div class="progress-bar-fill fill-adhkar" id="cat-adhkar-fill" style="width: 0%"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. القرآن -->
+            <div class="category-card card" data-cat="quran">
+              <div class="cat-header">
+                <span class="cat-icon bg-quran">📖</span>
+                <span class="cat-name">القرآن</span>
+              </div>
+              <div class="cat-progress-wrap">
+                <div class="cat-numbers">
+                  <span class="cat-count" id="cat-quran-count">0 من 2</span>
+                  <span class="cat-pct" id="cat-quran-pct">0%</span>
+                </div>
+                <div class="progress-bar-bg">
+                  <div class="progress-bar-fill fill-quran" id="cat-quran-fill" style="width: 0%"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 4. المذاكرة -->
+            <div class="category-card card" data-cat="study">
+              <div class="cat-header">
+                <span class="cat-icon bg-study">📚</span>
+                <span class="cat-name">المذاكرة</span>
+              </div>
+              <div class="cat-progress-wrap">
+                <div class="cat-numbers">
+                  <span class="cat-count" id="cat-study-count">0 من 0</span>
+                  <span class="cat-pct" id="cat-study-pct">0%</span>
+                </div>
+                <div class="progress-bar-bg">
+                  <div class="progress-bar-fill fill-study" id="cat-study-fill" style="width: 0%"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 5. الكلية -->
+            <div class="category-card card" data-cat="college">
+              <div class="cat-header">
+                <span class="cat-icon bg-college">🎓</span>
+                <span class="cat-name">الكلية</span>
+              </div>
+              <div class="cat-progress-wrap">
+                <div class="cat-numbers">
+                  <span class="cat-count" id="cat-college-count">0 من 0</span>
+                  <span class="cat-pct" id="cat-college-pct">0%</span>
+                </div>
+                <div class="progress-bar-bg">
+                  <div class="progress-bar-fill fill-college" id="cat-college-fill" style="width: 0%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tasks Section -->
+          <div class="tasks-section card">
+            <div class="tasks-header">
+              <div class="tasks-title-area">
+                <h3 class="card-title">🎯 مهام وأهداف اليوم (<span id="tasks-day-name">اليوم</span>)</h3>
+                <span class="badge" id="tasks-counter-badge">0 مهام</span>
+              </div>
+
+              <div class="tasks-actions-area">
+                <!-- Filter Tabs -->
+                <div class="filter-tabs">
+                  <button class="filter-btn active" data-filter="all">الكل</button>
+                  <button class="filter-btn" data-filter="pending">المتبقية</button>
+                  <button class="filter-btn" data-filter="completed">المكتملة</button>
+                </div>
+
+                <!-- Add Task Button -->
+                <button class="btn btn-primary btn-sm" id="open-add-task-modal-btn">
+                  <span>➕</span>
+                  <span>إضافة مهمة</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Task List Container -->
+            <div class="task-list" id="task-list">
+              <!-- Dynamically populated from JS -->
+            </div>
+
+            <!-- Empty State -->
+            <div class="empty-state hidden" id="task-empty-state">
+              <span class="empty-state-icon">📋</span>
+              <p class="empty-state-title">لا توجد مهام حالياً</p>
+              <p class="empty-state-subtitle">يمكنك إضافة مهمة جديدة أو اختيار يوم آخر للبدء.</p>
+            </div>
+
+            <!-- All Completed State Banner -->
+            <div class="all-completed-banner hidden" id="all-completed-banner">
+              <span class="banner-icon">🎉</span>
+              <div class="banner-text">
+                <strong>أحسنت يا أدهم! خلصت كل أهداف اليوم.</strong>
+                <span>استمر على هذا المنوال الرائع نحو أهدافك وطموحك!</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- VIEW 2: WEEKLY GOALS & SCHEDULE -->
+        <!-- ============================================== -->
+        <section class="view-section" id="view-weekly">
+          <div class="section-title-wrap">
+            <div>
+              <h2 class="section-title">📅 أهداف وجدول الأسبوع</h2>
+              <p class="section-subtitle">نظرة شاملة على مستهدفات الأيام السبعة وجدول الكلية والمذاكرة الذكية</p>
+            </div>
+            <button class="btn btn-primary btn-sm" id="weekly-add-task-btn">
+              <span>➕</span>
+              <span>إضافة هدف لأي يوم</span>
+            </button>
+          </div>
+
+          <!-- Weekly Overview Statistics Cards -->
+          <div class="weekly-overview-grid">
+            <div class="kpi-card card">
+              <span class="kpi-icon bg-indigo">🎯</span>
+              <div class="kpi-data">
+                <span class="kpi-label">إجمالي أهداف الأسبوع</span>
+                <strong class="kpi-value" id="weekly-total-tasks">0</strong>
+                <span class="kpi-sub">مهمة مخططة</span>
+              </div>
+            </div>
+
+            <div class="kpi-card card">
+              <span class="kpi-icon bg-emerald">✅</span>
+              <div class="kpi-data">
+                <span class="kpi-label">المهام المكتملة</span>
+                <strong class="kpi-value" id="weekly-completed-tasks">0</strong>
+                <span class="kpi-sub">تم إنجازها بنجاح</span>
+              </div>
+            </div>
+
+            <div class="kpi-card card">
+              <span class="kpi-icon bg-blue">📈</span>
+              <div class="kpi-data">
+                <span class="kpi-label">نسبة الإنجاز الأسبوعية</span>
+                <strong class="kpi-value" id="weekly-completion-rate">0%</strong>
+                <span class="kpi-sub">من إجمالي الأسبوع</span>
+              </div>
+            </div>
+
+            <div class="kpi-card card">
+              <span class="kpi-icon bg-amber">🏆</span>
+              <div class="kpi-data">
+                <span class="kpi-label">أيام تحقيق Target</span>
+                <strong class="kpi-value" id="weekly-target-days">0 من 7</strong>
+                <span class="kpi-sub">أيام بلغت نسبة الإنجاز</span>
+              </div>
+            </div>
+
+            <div class="kpi-card card">
+              <span class="kpi-icon bg-purple">⏱️</span>
+              <div class="kpi-data">
+                <span class="kpi-label">ساعات المذاكرة المقدرة</span>
+                <strong class="kpi-value" id="weekly-study-hours">0 س</strong>
+                <span class="kpi-sub">خلال الأسبوع</span>
+              </div>
+            </div>
+
+            <div class="kpi-card card">
+              <span class="kpi-icon bg-rose">🔥</span>
+              <div class="kpi-data">
+                <span class="kpi-label">أطول سلسلة (Streak)</span>
+                <strong class="kpi-value" id="weekly-longest-streak">0</strong>
+                <span class="kpi-sub">أيام متواصلة</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 7 Days Grid -->
+          <div class="days-cards-grid" id="weekly-days-grid">
+            <!-- 7 Cards dynamically rendered by JS -->
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- VIEW 3: SUBJECTS & POMODORO TIMER -->
+        <!-- ============================================== -->
+        <section class="view-section" id="view-subjects">
+          <div class="section-title-wrap">
+            <div>
+              <h2 class="section-title">📚 المواد الدراسية ومؤقت التركيز</h2>
+              <p class="section-subtitle">متابعة مقررات كلية الحاسبات وإدارة جلسات المذاكرة بأسلوب البومودورو</p>
+            </div>
+          </div>
+
+          <!-- Pomodoro Timer Card -->
+          <div class="pomodoro-card card">
+            <div class="pomo-layout">
+              <!-- Timer Display -->
+              <div class="pomo-display-area">
+                <div class="pomo-modes">
+                  <button class="pomo-mode-btn active" data-mode="study">⏱️ جلسة مذاكرة (25 دقيقة)</button>
+                  <button class="pomo-mode-btn" data-mode="break">☕ استراحة قصيرة (5 دقائق)</button>
+                  <button class="pomo-mode-btn" data-mode="longBreak">🌴 استراحة طويلة (15 دقيقة)</button>
+                </div>
+
+                <div class="pomo-clock-circle">
+                  <svg class="pomo-svg" width="220" height="220">
+                    <circle class="pomo-svg-bg" cx="110" cy="110" r="95"></circle>
+                    <circle class="pomo-svg-bar" id="pomo-svg-bar" cx="110" cy="110" r="95"></circle>
+                  </svg>
+                  <div class="pomo-time-text" id="pomo-timer-display">25:00</div>
+                  <div class="pomo-current-subject" id="pomo-current-subject-label">اختر مادة للبدء</div>
+                </div>
+
+                <div class="pomo-controls">
+                  <button class="btn btn-primary pomo-btn-lg" id="pomo-start-btn">
+                    <span id="pomo-play-icon">▶</span>
+                    <span id="pomo-start-text">ابدأ الجلسة</span>
+                  </button>
+                  <button class="btn btn-secondary pomo-btn-sm" id="pomo-reset-btn" title="إعادة الضبط">
+                    <span>🔄</span>
+                    <span>إعادة</span>
+                  </button>
+                  <button class="btn btn-secondary pomo-btn-sm" id="pomo-skip-btn" title="تخطي الفترة">
+                    <span>⏭️</span>
+                    <span>تخطي</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Subject Selector & Pomodoro Stats -->
+              <div class="pomo-settings-area">
+                <h3 class="pomo-heading">📌 إعداد الجلسة الحالية</h3>
+                
+                <div class="form-group">
+                  <label for="pomo-subject-select" class="form-label">المادة المستهدفة للمذاكرة:</label>
+                  <select id="pomo-subject-select" class="select-input">
+                    <option value="">-- اختر مادة للمذاكرة --</option>
+                    <option value="cs2">برمجة حاسب 2</option>
+                    <option value="db">قواعد البيانات</option>
+                    <option value="la">جبر خطي</option>
+                    <option value="mm">نظم الوسائط المتعددة</option>
+                    <option value="toc">نظرية الحاسبات</option>
+                  </select>
+                </div>
+
+                <div class="pomo-notes-box">
+                  <label for="pomo-session-notes" class="form-label">ملاحظات الجلسة (اختياري):</label>
+                  <input type="text" id="pomo-session-notes" class="input-text" placeholder="مثال: حل شيت 3، أو فهم Recursion...">
+                </div>
+
+                <div class="pomo-summary-stats">
+                  <div class="pomo-stat-item">
+                    <span class="pomo-stat-label">جلسات اليوم المكتملة</span>
+                    <strong class="pomo-stat-val" id="pomo-today-sessions">0 جلسات</strong>
+                  </div>
+                  <div class="pomo-stat-item">
+                    <span class="pomo-stat-label">إجمالي دقائق اليوم</span>
+                    <strong class="pomo-stat-val" id="pomo-today-minutes">0 دقيقة</strong>
+                  </div>
+                </div>
+
+                <div class="pomo-tip-alert">
+                  <span>💡</span>
+                  <small>عند اكتمال الجلسة (25 دقيقة)، يُضاف الوقت والجلسة تلقائيًا لإحصائيات المادة المحددة في LocalStorage.</small>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Academic Subjects Grid -->
+          <div class="section-title-wrap">
+            <h3 class="section-title">📊 حالة مقررات الفصل الدراسي</h3>
+            <span class="section-meta">5 مقررات تخصصية</span>
+          </div>
+
+          <div class="subjects-cards-grid" id="subjects-cards-grid">
+            <!-- Dynamic Subject Cards Rendered by JS -->
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- VIEW 4: STATISTICS -->
+        <!-- ============================================== -->
+        <section class="view-section" id="view-statistics">
+          <div class="section-title-wrap">
+            <div>
+              <h2 class="section-title">📊 لوحة الإحصائيات الشاملة</h2>
+              <p class="section-subtitle">تحليل دقيق للإنجاز اليومي والأسبوعي وساعات المذاكرة وسلاسل الالتزام</p>
+            </div>
+          </div>
+
+          <!-- Main KPI Cards -->
+          <div class="stats-kpi-grid">
+            <div class="kpi-card card">
+              <span class="kpi-icon bg-indigo">📈</span>
+              <div class="kpi-data">
+                <span class="kpi-label">نسبة إنجاز اليوم</span>
+                <strong class="kpi-value" id="stats-today-rate">0%</strong>
+                <span class="kpi-sub" id="stats-today-sub">0 من 0 مهام</span>
+              </div>
+            </div>
+
+            <div class="kpi-card card">
+              <span class="kpi-icon bg-blue">📅</span>
+              <div class="kpi-data">
+                <span class="kpi-label">نسبة إنجاز الأسبوع</span>
+                <strong class="kpi-value" id="stats-weekly-rate">0%</strong>
+                <span class="kpi-sub">المتوسط الأسبوعي</span>
+              </div>
+            </div>
+
+            <div class="kpi-card card">
+              <span class="kpi-icon bg-emerald">✅</span>
+              <div class="kpi-data">
+                <span class="kpi-label">إجمالي المهام المكتملة</span>
+                <strong class="kpi-value" id="stats-total-completed">0</strong>
+                <span class="kpi-sub">مهمة ناجحة</span>
+              </div>
+            </div>
+
+            <div class="kpi-card card">
+              <span class="kpi-icon bg-rose">❌</span>
+              <div class="kpi-data">
+                <span class="kpi-label">المهام غير المكتملة</span>
+                <strong class="kpi-value" id="stats-total-missed">0</strong>
+                <span class="kpi-sub">مسجلة بالأرشيف</span>
+              </div>
+            </div>
+
+            <div class="kpi-card card">
+              <span class="kpi-icon bg-purple">⏱️</span>
+              <div class="kpi-data">
+                <span class="kpi-label">إجمالي وقت المذاكرة</span>
+                <strong class="kpi-value" id="stats-total-study-time">0 س 0 د</strong>
+                <span class="kpi-sub">مسجل بالمؤقت والمهام</span>
+              </div>
+            </div>
+
+            <div class="kpi-card card">
+              <span class="kpi-icon bg-amber">🔥</span>
+              <div class="kpi-data">
+                <span class="kpi-label">سلسلة الإنجاز الحالية</span>
+                <strong class="kpi-value" id="stats-current-streak">0 أيام</strong>
+                <span class="kpi-sub" id="stats-longest-streak-sub">أطول سلسلة: 0 أيام</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Streak Milestones Card -->
+          <div class="milestones-card card">
+            <div class="milestones-header">
+              <h3 class="card-title">🔥 محطات سلسلة الإنجاز (Streak Milestones)</h3>
+              <span class="card-subtitle">الاستمرارية هي سر التميز في علوم الحاسب والحياة</span>
+            </div>
+            <div class="milestones-badges-row">
+              <div class="milestone-badge" id="milestone-7" data-days="7">
+                <span class="m-icon">🥉</span>
+                <span class="m-days">7 أيام</span>
+                <span class="m-status">قيد التقدم</span>
+              </div>
+              <div class="milestone-badge" id="milestone-14" data-days="14">
+                <span class="m-icon">🥈</span>
+                <span class="m-days">14 يوم</span>
+                <span class="m-status">مغلق</span>
+              </div>
+              <div class="milestone-badge" id="milestone-30" data-days="30">
+                <span class="m-icon">🥇</span>
+                <span class="m-days">30 يوم</span>
+                <span class="m-status">مغلق</span>
+              </div>
+              <div class="milestone-badge" id="milestone-60" data-days="60">
+                <span class="m-icon">💎</span>
+                <span class="m-days">60 يوم</span>
+                <span class="m-status">مغلق</span>
+              </div>
+              <div class="milestone-badge" id="milestone-90" data-days="90">
+                <span class="m-icon">👑</span>
+                <span class="m-days">90 يوم</span>
+                <span class="m-status">مغلق</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Charts Row -->
+          <div class="charts-two-col">
+            <!-- Weekly Completion Rate Chart -->
+            <div class="chart-card card">
+              <div class="card-title-group">
+                <h3 class="card-title">📊 نسبة الإنجاز عبر أيام الأسبوع</h3>
+                <span class="card-subtitle">مقارنة أداء الأيام السبعة</span>
+              </div>
+              <div class="custom-bar-chart" id="weekly-bar-chart">
+                <!-- Dynamic SVG / CSS Bars -->
+              </div>
+            </div>
+
+            <!-- Subject Distribution Chart -->
+            <div class="chart-card card">
+              <div class="card-title-group">
+                <h3 class="card-title">📚 توزيع وقت المذاكرة حسب المواد</h3>
+                <span class="card-subtitle">تحديد المواد الأكثر والأقل مذاكرة</span>
+              </div>
+
+              <!-- Top & Least Studied Badges -->
+              <div class="subject-extremes-row">
+                <div class="extreme-badge extreme-top">
+                  <span class="ex-icon">🏆</span>
+                  <div>
+                    <small>الأكثر مذاكرة</small>
+                    <strong id="stats-most-studied">-</strong>
+                  </div>
+                </div>
+                <div class="extreme-badge extreme-least">
+                  <span class="ex-icon">⚠️</span>
+                  <div>
+                    <small>تحتاج تركيزًا أكبر</small>
+                    <strong id="stats-least-studied">-</strong>
+                  </div>
+                </div>
+              </div>
+
+              <div class="subject-bars-list" id="subject-distribution-bars">
+                <!-- Dynamic distribution bars -->
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- VIEW 5: SETTINGS -->
+        <!-- ============================================== -->
+        <section class="view-section" id="view-settings">
+          <div class="section-title-wrap">
+            <div>
+              <h2 class="section-title">⚙️ الإعدادات والتفضيلات</h2>
+              <p class="section-subtitle">إدارة مظهر التطبيق ومواعيد الصلوات والنوم والنسخ الاحتياطي</p>
+            </div>
+          </div>
+
+          <div class="settings-grid">
+            <!-- Appearance & Personal Settings -->
+            <div class="settings-card card">
+              <h3 class="card-title">🎨 المظهر والشخصية</h3>
+              
+              <div class="setting-item">
+                <div class="setting-info">
+                  <strong>الوضع الداكن / الفاتح</strong>
+                  <span>اختيار الثيم المريح لعينيك أثناء العمل</span>
+                </div>
+                <div class="theme-toggle-switch">
+                  <button class="theme-choice-btn active" id="theme-btn-dark">🌙 داكن</button>
+                  <button class="theme-choice-btn" id="theme-btn-light">☀️ فاتح</button>
+                </div>
+              </div>
+
+              <div class="setting-item">
+                <div class="setting-info">
+                  <strong>اسم المستخدم</strong>
+                  <span>الاسم الذي يظهر في رسائل الترحيب</span>
+                </div>
+                <input type="text" id="setting-user-name" class="input-text input-sm" value="أدهم">
+              </div>
+
+              <div class="setting-item">
+                <div class="setting-info">
+                  <strong>موعد النوم الافتراضي</strong>
+                  <span>الموعد المحدد لانتهاء مهام اليوم (الافتراضي: 10:00 مساءً)</span>
+                </div>
+                <input type="time" id="setting-bedtime" class="input-text input-sm" value="22:00">
+              </div>
+
+              <div class="setting-item">
+                <div class="setting-info">
+                  <strong>إشعارات المتصفح</strong>
+                  <span>تنبيهات للمهام القادمة ومؤقت المذاكرة</span>
+                </div>
+                <label class="switch-toggle">
+                  <input type="checkbox" id="setting-notifications-toggle">
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Prayer Times Customization -->
+            <div class="settings-card card">
+              <div class="card-title-group">
+                <h3 class="card-title">🕌 مواعيد الصلوات الأساسية (أوقات الانتهاء)</h3>
+                <span class="card-subtitle">يبدأ وقت الصلاة قبل هذه المواعيد بنصف ساعة</span>
+              </div>
+
+              <div class="prayer-settings-grid">
+                <div class="form-group">
+                  <label for="prayer-fajr" class="form-label">الفجر (نهاية 6:00):</label>
+                  <input type="time" id="prayer-fajr" class="input-text" value="06:00">
+                </div>
+                <div class="form-group">
+                  <label for="prayer-dhuhr" class="form-label">الظهر (نهاية 1:30):</label>
+                  <input type="time" id="prayer-dhuhr" class="input-text" value="13:30">
+                </div>
+                <div class="form-group">
+                  <label for="prayer-asr" class="form-label">العصر (نهاية 5:00):</label>
+                  <input type="time" id="prayer-asr" class="input-text" value="17:00">
+                </div>
+                <div class="form-group">
+                  <label for="prayer-maghrib" class="form-label">المغرب (نهاية 7:00):</label>
+                  <input type="time" id="prayer-maghrib" class="input-text" value="19:00">
+                </div>
+                <div class="form-group">
+                  <label for="prayer-isha" class="form-label">العشاء (نهاية 8:30):</label>
+                  <input type="time" id="prayer-isha" class="input-text" value="20:30">
+                </div>
+              </div>
+
+              <button class="btn btn-secondary btn-sm" id="save-prayers-btn" style="margin-top: 1rem;">
+                💾 حفظ مواعيد الصلاة
+              </button>
+            </div>
+
+            <!-- Data Management & Backups -->
+            <div class="settings-card card full-col">
+              <h3 class="card-title">💾 إدارة البيانات والنسخ الاحتياطي (LocalStorage)</h3>
+              <p class="card-subtitle">بياناتك محفوظة محلياً في متصفحك بشكل آمن وسريع، ويمكنك تنزيل نسخة احتياطية أو استعادتها بأي وقت.</p>
+
+              <div class="data-actions-row">
+                <!-- Reset Today -->
+                <div class="data-action-box">
+                  <h4>إعادة تعيين مهام اليوم</h4>
+                  <p>إعادة ضبط حالة مهام اليوم الحالي واسترجاع الجدول الافتراضي إذا تم التعديل عليه.</p>
+                  <button class="btn btn-secondary" id="reset-today-btn">
+                    <span>🔄</span>
+                    <span>إعادة تعيين اليوم</span>
+                  </button>
+                </div>
+
+                <!-- Export Data -->
+                <div class="data-action-box">
+                  <h4>تصدير نسخة احتياطية (Export)</h4>
+                  <p>تنزيل ملف JSON يحتوي على كامل المهام والإحصائيات والمواد وسلسلة الـ Streak.</p>
+                  <button class="btn btn-primary" id="export-data-btn">
+                    <span>📥</span>
+                    <span>تصدير البيانات (JSON)</span>
+                  </button>
+                </div>
+
+                <!-- Import Data -->
+                <div class="data-action-box">
+                  <h4>استيراد نسخة سابقة (Import)</h4>
+                  <p>استرجاع بياناتك المحفوظة من ملف JSON تم تصديره سابقاً.</p>
+                  <label class="btn btn-secondary file-upload-btn">
+                    <span>📤</span>
+                    <span>استيراد ملف JSON</span>
+                    <input type="file" id="import-data-file" accept=".json" class="sr-only">
+                  </label>
+                </div>
+
+                <!-- Danger Zone: Reset All -->
+                <div class="data-action-box danger-zone">
+                  <h4>إعادة ضبط المصنع (مسح شامل)</h4>
+                  <p>حذف جميع المهام والإحصائيات والبيانات وإعادة تشغيل التطبيق بحالته الأولى.</p>
+                  <button class="btn btn-danger" id="reset-all-btn">
+                    <span>⚠️</span>
+                    <span>مسح جميع البيانات</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+
+    <!-- MOBILE BOTTOM NAVIGATION -->
+    <nav class="bottom-nav">
+      <button class="bottom-nav-item active" data-view="home">
+        <span class="b-icon">🏠</span>
+        <span class="b-label">الرئيسية</span>
+      </button>
+      <button class="bottom-nav-item" data-view="weekly">
+        <span class="b-icon">📅</span>
+        <span class="b-label">الأسبوع</span>
+      </button>
+      <button class="bottom-nav-item" data-view="subjects">
+        <span class="b-icon">📚</span>
+        <span class="b-label">المواد</span>
+      </button>
+      <button class="bottom-nav-item" data-view="statistics">
+        <span class="b-icon">📊</span>
+        <span class="b-label">الإحصائيات</span>
+      </button>
+      <button class="bottom-nav-item" data-view="settings">
+        <span class="b-icon">⚙️</span>
+        <span class="b-label">الإعدادات</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODALS -->
+  <!-- ============================================== -->
+
+  <!-- 1. ADD / EDIT TASK MODAL -->
+  <div class="modal-overlay hidden" id="task-modal">
+    <div class="modal-content card">
+      <div class="modal-header">
+        <h3 class="modal-title" id="task-modal-title">إضافة مهمة جديدة</h3>
+        <button class="modal-close-btn" id="task-modal-close" aria-label="إغلاق">&times;</button>
+      </div>
+
+      <form id="task-form" class="modal-body">
+        <input type="hidden" id="task-id">
+
+        <div class="form-group">
+          <label for="task-name-input" class="form-label">اسم المهمة: <span class="text-danger">*</span></label>
+          <input type="text" id="task-name-input" class="input-text" placeholder="مثال: مراجعة شيت قواعد البيانات..." required>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="task-time-input" class="form-label">الوقت المحدد:</label>
+            <input type="time" id="task-time-input" class="input-text" value="14:00">
+          </div>
+
+          <div class="form-group">
+            <label for="task-category-select" class="form-label">التصنيف:</label>
+            <select id="task-category-select" class="select-input">
+              <option value="study">📚 المذاكرة</option>
+              <option value="prayer">🕌 الصلاة</option>
+              <option value="quran">📖 القرآن</option>
+              <option value="adhkar">🤲 الأذكار</option>
+              <option value="college">🎓 الكلية</option>
+              <option value="general">✨ عام / مخصص</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group" id="task-day-group">
+          <label for="task-day-select" class="form-label">يوم المهمة:</label>
+          <select id="task-day-select" class="select-input">
+            <option value="current">اليوم المعروض حالياً</option>
+            <option value="5">الجمعة</option>
+            <option value="6">السبت</option>
+            <option value="0">الأحد</option>
+            <option value="1">الاثنين</option>
+            <option value="2">الثلاثاء</option>
+            <option value="3">الأربعاء</option>
+            <option value="4">الخميس</option>
+          </select>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="task-modal-cancel">إلغاء</button>
+          <button type="submit" class="btn btn-primary" id="task-modal-submit">حفظ المهمة</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. DAY DETAILS MODAL (from Weekly View) -->
+  <div class="modal-overlay hidden" id="day-details-modal">
+    <div class="modal-content card modal-lg">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title" id="day-modal-title">تفاصيل أهداف اليوم</h3>
+          <span class="card-subtitle" id="day-modal-subtitle">جدول الكلية والمذاكرة والمهام</span>
+        </div>
+        <button class="modal-close-btn" id="day-modal-close" aria-label="إغلاق">&times;</button>
+      </div>
+
+      <div class="modal-body" id="day-modal-body">
+        <!-- Day summary stats & tasks list rendered dynamically -->
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="day-modal-switch-btn">عرض هذا اليوم في الرئيسية</button>
+        <button type="button" class="btn btn-secondary" id="day-modal-close-btn">إغلاق</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. CONFIRMATION DIALOG MODAL -->
+  <div class="modal-overlay hidden" id="confirm-modal">
+    <div class="modal-content card modal-sm">
+      <div class="modal-header">
+        <h3 class="modal-title" id="confirm-title">تأكيد الإجراء</h3>
+        <button class="modal-close-btn" id="confirm-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p id="confirm-message">هل أنت متأكد من تنفيذ هذا الإجراء؟</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="confirm-cancel-btn">إلغاء</button>
+        <button type="button" class="btn btn-danger" id="confirm-ok-btn">تأكيد</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. DAILY COMPLETION CELEBRATION MODAL -->
+  <div class="modal-overlay hidden" id="celebration-modal">
+    <div class="modal-content card modal-sm celebration-content">
+      <div class="celebration-badge-big">🎉</div>
+      <h2 class="celebration-title">أحسنت يا أدهم!</h2>
+      <p class="celebration-text">حققت هدف اليوم بالكامل بنسبة 100%.</p>
+      <div class="celebration-streak-info">
+        <span>🔥 استمرت سلسلة إنجازك المتتالية!</span>
+      </div>
+      <button class="btn btn-primary" id="celebration-close-btn">متابعة اليوم 🚀</button>
+    </div>
+  </div>
+
+  <!-- 5. EDIT DAY / COLLEGE NOTE MODAL -->
+  <div class="modal-overlay hidden" id="college-note-modal">
+    <div class="modal-content card modal-sm">
+      <div class="modal-header">
+        <h3 class="modal-title" id="college-note-modal-title">تعديل جدول الكلية لهذا اليوم</h3>
+        <button class="modal-close-btn" id="college-note-close" aria-label="إغلاق">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="college-note-day-idx">
+        <div class="form-group">
+          <label for="college-note-input" class="form-label">ملاحظة / جدول الكلية والمذاكرة:</label>
+          <input type="text" id="college-note-input" class="input-text" placeholder="مثال: محاضرة برمجة 2 (10:00 - 12:00)...">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="college-note-cancel">إلغاء</button>
+        <button type="button" class="btn btn-primary" id="college-note-save">حفظ التعديل</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATIONS CONTAINER -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Audio elements generated via Web Audio API, or fallback beep -->
+  <script src="script.js"></script>
+</body>
+</html>
